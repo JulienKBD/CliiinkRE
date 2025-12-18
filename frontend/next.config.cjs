@@ -13,6 +13,8 @@ const nextConfig = {
       bodySizeLimit: '10mb',
     },
   },
-}
+  // OBLIGATOIRE pour Netlify App Router
+  output: 'standalone',
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
