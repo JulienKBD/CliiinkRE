@@ -23,6 +23,7 @@ import { Input } from '../../components/ui/input'
 import { Textarea } from '../../components/ui/textarea'
 import { Card, CardContent } from '../../components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
+import { createContactMessage } from '../../lib/api'
 
 // Validation schemas
 const particulierSchema = z.object({
@@ -105,14 +106,18 @@ export default function ContactPageClient() {
     setSubmitStatus('idle')
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      await createContactMessage({
+        type: 'PARTICULIER',
+        name: data.name,
+        email: data.email,
+        message: data.message,
+      })
       
-      console.log('Particulier form submitted:', data)
       setSubmitStatus('success')
       particulierForm.reset()
       setAttachment(null)
     } catch (error) {
+      console.error('Error submitting form:', error)
       setSubmitStatus('error')
     } finally {
       setIsSubmitting(false)
@@ -124,10 +129,15 @@ export default function ContactPageClient() {
     setSubmitStatus('idle')
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      
-      console.log('Commerçant form submitted:', data)
+      await createContactMessage({
+        type: 'COMMERCANT',
+        name: data.name,
+        email: data.email,
+        message: data.message,
+        companyName: data.companyName,
+        phone: data.phone,
+        position: data.position,
+      })
       setSubmitStatus('success')
       commercantForm.reset()
     } catch (error) {

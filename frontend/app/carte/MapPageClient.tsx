@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
-import { MapPin, Navigation, X, List, Map, ChevronRight } from 'lucide-react'
+import { MapPin, Navigation, X, List, Map, ChevronRight, Loader2 } from 'lucide-react'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import {
@@ -14,7 +14,7 @@ import {
 } from '../../components/ui/select'
 import { Badge } from '../../components/ui/badge'
 import { getBorneStatusLabel } from '../../lib/utils'
-import type { Borne } from '../../types'
+import { getBornes, type Borne } from '../../lib/api'
 import type L from 'leaflet'
 
 // Dynamic imports for Leaflet components
@@ -35,122 +35,6 @@ const Popup = dynamic(
   { ssr: false }
 )
 
-// Sample data - will be replaced with API data
-const bornesData: Borne[] = [
-  {
-    id: '1',
-    name: 'Borne Saint-Denis Centre',
-    address: '15 Rue Jean Chatel',
-    city: 'Saint-Denis',
-    zipCode: '97400',
-    latitude: -20.8789,
-    longitude: 55.4481,
-    status: 'ACTIVE',
-    description: 'Borne située en centre-ville, accessible 24h/24',
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '2',
-    name: 'Borne Saint-Denis Barachois',
-    address: 'Place du Barachois',
-    city: 'Saint-Denis',
-    zipCode: '97400',
-    latitude: -20.8764,
-    longitude: 55.4507,
-    status: 'ACTIVE',
-    description: 'Face à la mer, près du jardin de l\'État',
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '3',
-    name: 'Borne Saint-Pierre Centre',
-    address: '25 Rue des Bons Enfants',
-    city: 'Saint-Pierre',
-    zipCode: '97410',
-    latitude: -21.3393,
-    longitude: 55.4781,
-    status: 'ACTIVE',
-    description: 'Centre-ville de Saint-Pierre',
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '4',
-    name: 'Borne Saint-Paul Marché',
-    address: 'Rue du Marché',
-    city: 'Saint-Paul',
-    zipCode: '97460',
-    latitude: -21.0107,
-    longitude: 55.2701,
-    status: 'ACTIVE',
-    description: 'Près du marché forain',
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '5',
-    name: 'Borne Le Port',
-    address: '10 Avenue de la Commune de Paris',
-    city: 'Le Port',
-    zipCode: '97420',
-    latitude: -20.9333,
-    longitude: 55.2900,
-    status: 'MAINTENANCE',
-    description: 'En maintenance jusqu\'au 15/12',
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '6',
-    name: 'Borne Saint-Louis',
-    address: 'Place de la Mairie',
-    city: 'Saint-Louis',
-    zipCode: '97450',
-    latitude: -21.2833,
-    longitude: 55.4167,
-    status: 'ACTIVE',
-    description: 'Devant la mairie',
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '7',
-    name: 'Borne Sainte-Marie',
-    address: '5 Rue de la Rivière des Pluies',
-    city: 'Sainte-Marie',
-    zipCode: '97438',
-    latitude: -20.8969,
-    longitude: 55.5361,
-    status: 'ACTIVE',
-    description: 'Proche du centre commercial',
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '8',
-    name: 'Borne Saint-André',
-    address: 'Rue de la Gare',
-    city: 'Saint-André',
-    zipCode: '97440',
-    latitude: -20.9631,
-    longitude: 55.6497,
-    status: 'FULL',
-    description: 'Centre-ville, collecte prévue',
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-]
-
 const REUNION_CENTER: [number, number] = [-21.1151, 55.5364]
 
 const cities = ['Toutes les villes', 'Saint-Denis', 'Saint-Pierre', 'Saint-Paul', 'Le Port', 'Saint-Louis', 'Sainte-Marie', 'Saint-André']
@@ -163,8 +47,10 @@ const statuses = [
 
 export default function MapPageClient() {
   const [isMounted, setIsMounted] = useState(false)
-  const [bornes, setBornes] = useState<Borne[]>(bornesData)
-  const [filteredBornes, setFilteredBornes] = useState<Borne[]>(bornesData)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [bornes, setBornes] = useState<Borne[]>([])
+  const [filteredBornes, setFilteredBornes] = useState<Borne[]>([])
   const [selectedBorne, setSelectedBorne] = useState<Borne | null>(null)
   const [cityFilter, setCityFilter] = useState('Toutes les villes')
   const [statusFilter, setStatusFilter] = useState('ALL')
@@ -208,6 +94,19 @@ export default function MapPageClient() {
       })
     })
     setIsMounted(true)
+
+    // Fetch bornes from API
+    getBornes({ isActive: true })
+      .then((data) => {
+        setBornes(data)
+        setFilteredBornes(data)
+        setIsLoading(false)
+      })
+      .catch((err) => {
+        console.error('Error fetching bornes:', err)
+        setError('Impossible de charger les bornes')
+        setIsLoading(false)
+      })
 
     return () => {
       document.head.removeChild(link)

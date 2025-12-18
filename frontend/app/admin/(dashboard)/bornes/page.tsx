@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { prisma } from '@/lib/prisma'
+import { getBornes } from '@/lib/api'
 import { Plus, Edit, Trash2, MapPin, CheckCircle, XCircle } from 'lucide-react'
 import { Button } from '../../../../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../../components/ui/card'
@@ -12,26 +12,29 @@ type Borne = {
   city: string
   zipCode: string
   isActive: boolean
-  createdAt: Date
+  createdAt: string
 }
 
-async function getBornes(): Promise<Borne[]> {
-  return await prisma.borne.findMany({
-    orderBy: { name: 'asc' },
-    select: {
-      id: true,
-      name: true,
-      address: true,
-      city: true,
-      zipCode: true,
-      isActive: true,
-      createdAt: true,
-    },
-  })
+async function fetchBornes(): Promise<Borne[]> {
+  try {
+    const bornes = await getBornes()
+    return bornes.map(b => ({
+      id: b.id,
+      name: b.name,
+      address: b.address,
+      city: b.city,
+      zipCode: b.zipCode,
+      isActive: b.isActive,
+      createdAt: b.createdAt || '',
+    }))
+  } catch (error) {
+    console.error('Error fetching bornes:', error)
+    return []
+  }
 }
 
 export default async function BornesPage() {
-  const bornes = await getBornes()
+  const bornes = await fetchBornes()
   const activeCount = bornes.filter(b => b.isActive).length
   const inactiveCount = bornes.filter(b => !b.isActive).length
 

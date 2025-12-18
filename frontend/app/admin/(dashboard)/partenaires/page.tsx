@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { prisma } from '@/lib/prisma'
+import { getPartners } from '@/lib/api'
 import { Plus, Edit, Trash2, Users, CheckCircle, XCircle } from 'lucide-react'
 import { Button } from '../../../../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../../components/ui/card'
@@ -13,23 +13,26 @@ type Partner = {
   city: string
   discount: string | null
   isActive: boolean
-  createdAt: Date
+  createdAt: string
 }
 
-async function getPartners(): Promise<Partner[]> {
-  return await prisma.partner.findMany({
-    orderBy: { name: 'asc' },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      category: true,
-      city: true,
-      discount: true,
-      isActive: true,
-      createdAt: true,
-    },
-  })
+async function fetchPartners(): Promise<Partner[]> {
+  try {
+    const partners = await getPartners()
+    return partners.map(p => ({
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      category: p.category,
+      city: p.city,
+      discount: p.discount || null,
+      isActive: p.isActive,
+      createdAt: p.createdAt || '',
+    }))
+  } catch (error) {
+    console.error('Error fetching partners:', error)
+    return []
+  }
 }
 
 const categoryLabels: Record<string, string> = {
@@ -45,7 +48,7 @@ const categoryLabels: Record<string, string> = {
 }
 
 export default async function PartenairesPage() {
-  const partners = await getPartners()
+  const partners = await fetchPartners()
   const activeCount = partners.filter(p => p.isActive).length
   const inactiveCount = partners.filter(p => !p.isActive).length
 

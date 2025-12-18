@@ -1,63 +1,12 @@
 "use client"
 
-import { useRef } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '../ui/button'
 import { getCategoryLabel } from '../../lib/utils'
-
-// Sample partners - will be replaced with database data
-const partners = [
-  {
-    id: '1',
-    name: 'Le Comptoir Créole',
-    slug: 'le-comptoir-creole',
-    category: 'RESTAURANT',
-    discount: '-10%',
-    logoUrl: null,
-  },
-  {
-    id: '2',
-    name: 'Ti Punch Bar',
-    slug: 'ti-punch-bar',
-    category: 'BAR',
-    discount: '1 boisson offerte',
-    logoUrl: null,
-  },
-  {
-    id: '3',
-    name: 'Boutique Vanille Bourbon',
-    slug: 'boutique-vanille-bourbon',
-    category: 'BOUTIQUE',
-    discount: '-15%',
-    logoUrl: null,
-  },
-  {
-    id: '4',
-    name: 'Café des Îles',
-    slug: 'cafe-des-iles',
-    category: 'CAFE',
-    discount: 'Café offert',
-    logoUrl: null,
-  },
-  {
-    id: '5',
-    name: 'Super U Saint-Denis',
-    slug: 'super-u-saint-denis',
-    category: 'SUPERMARCHE',
-    discount: '5€ en bon d\'achat',
-    logoUrl: null,
-  },
-  {
-    id: '6',
-    name: 'Spa Lagon Bleu',
-    slug: 'spa-lagon-bleu',
-    category: 'BEAUTE',
-    discount: '-20%',
-    logoUrl: null,
-  },
-]
+import { getPartners, type Partner } from '../../lib/api'
 
 const categoryEmojis: Record<string, string> = {
   RESTAURANT: '🍽️',
@@ -73,6 +22,17 @@ const categoryEmojis: Record<string, string> = {
 
 export default function PartnersSlider() {
   const sliderRef = useRef<HTMLDivElement>(null)
+  const [partners, setPartners] = useState<Partner[]>([])
+
+  useEffect(() => {
+    getPartners({ isActive: true, isFeatured: true })
+      .then((data) => {
+        setPartners(data)
+      })
+      .catch((err) => {
+        console.error('Error fetching partners:', err)
+      })
+  }, [])
 
   const scroll = (direction: 'left' | 'right') => {
     if (sliderRef.current) {

@@ -5,7 +5,7 @@ Site web vitrine pour **Cliiink Réunion** - Le dispositif de recyclage du verre
 ![Next.js](https://img.shields.io/badge/Next.js-14-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38bdf8)
-![Prisma](https://img.shields.io/badge/Prisma-5-2D3748)
+![MySQL](https://img.shields.io/badge/MySQL-8-4479A1)
 
 ## 📋 Fonctionnalités
 
@@ -29,7 +29,7 @@ Site web vitrine pour **Cliiink Réunion** - Le dispositif de recyclage du verre
 
 ### Prérequis
 - Node.js 18+ 
-- PostgreSQL 14+
+- MySQL 8+
 - npm ou yarn
 
 ### Étapes
@@ -40,37 +40,54 @@ git clone <repository-url>
 cd CliiinkRE
 ```
 
-2. **Installer les dépendances**
+2. **Installer les dépendances frontend**
 ```bash
+cd frontend
 npm install
 ```
 
-3. **Configuration de l'environnement**
+3. **Installer les dépendances backend**
 ```bash
-cp .env.example .env
+cd ../backend
+npm install
 ```
 
-Modifiez le fichier `.env` avec vos valeurs :
+4. **Configuration de l'environnement**
+
+Frontend (.env):
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/cliiink_reunion"
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="your-secret-key-here"
+BACKEND_URL="http://localhost:3001"
 ```
 
-4. **Initialiser la base de données**
-```bash
-# Générer le client Prisma
-npx prisma generate
-
-# Créer les tables
-npx prisma db push
-
-# Peupler avec les données de démonstration
-npx prisma db seed
+Backend (.env):
+```env
+MYSQL_HOST="localhost"
+MYSQL_USER="root"
+MYSQL_ROOT_PASSWORD="your-password"
+MYSQL_DATABASE="cliiink_reunion"
+PORT=3001
+SECRET="your-jwt-secret"
 ```
 
-5. **Lancer le serveur de développement**
+5. **Initialiser la base de données**
 ```bash
+# Exécuter le script SQL dans MySQL
+mysql -u root -p < backend/config/db.sql
+```
+
+6. **Lancer les serveurs de développement**
+
+Backend:
+```bash
+cd backend
+npm run dev
+```
+
+Frontend:
+```bash
+cd frontend
 npm run dev
 ```
 
@@ -90,55 +107,57 @@ Après le seed de la base de données, un compte administrateur est créé :
 
 ```
 CliiinkRE/
-├── prisma/
-│   ├── schema.prisma      # Schéma de la base de données
-│   └── seed.ts            # Données de démonstration
-├── src/
+├── backend/
+│   ├── config/
+│   │   ├── db.js              # Configuration MySQL
+│   │   └── db.sql             # Script de création des tables
+│   ├── middlewares/           # Middlewares Express
+│   ├── routes/                # Routes API
+│   │   ├── articles/
+│   │   ├── auth/
+│   │   ├── bornes/
+│   │   ├── contact/
+│   │   ├── partners/
+│   │   └── stats/
+│   ├── server.js              # Point d'entrée serveur
+│   └── package.json
+├── frontend/
 │   ├── app/
-│   │   ├── (public)/      # Pages publiques
-│   │   │   ├── page.tsx              # Accueil
-│   │   │   ├── carte/                # Carte des bornes
-│   │   │   ├── actualites/           # Blog
-│   │   │   ├── partenaires/          # Liste partenaires
-│   │   │   ├── contact/              # Formulaires de contact
-│   │   │   ├── mentions-legales/
-│   │   │   ├── confidentialite/
-│   │   │   └── cookies/
-│   │   ├── admin/
-│   │   │   ├── login/                # Connexion admin
-│   │   │   └── (dashboard)/          # Dashboard protégé
-│   │   │       ├── page.tsx          # Tableau de bord
-│   │   │       ├── bornes/
-│   │   │       ├── partenaires/
-│   │   │       ├── actualites/
-│   │   │       ├── messages/
-│   │   │       └── parametres/
-│   │   ├── api/
-│   │   │   ├── auth/[...nextauth]/   # Authentification
-│   │   │   ├── contact/              # API contact
-│   │   │   ├── bornes/               # API bornes
-│   │   │   ├── partenaires/          # API partenaires
-│   │   │   ├── actualites/           # API articles
-│   │   │   └── stats/                # API statistiques
-│   │   ├── layout.tsx
-│   │   └── globals.css
+│   │   ├── page.tsx           # Page d'accueil
+│   │   ├── carte/             # Carte des bornes
+│   │   ├── actualites/        # Blog
+│   │   ├── partenaires/       # Liste partenaires
+│   │   ├── contact/           # Formulaires de contact
+│   │   ├── admin/             # Dashboard admin
+│   │   └── api/auth/          # NextAuth API routes
 │   ├── components/
-│   │   ├── ui/                       # Composants réutilisables
-│   │   ├── layout/                   # Header, Footer
-│   │   ├── home/                     # Sections page d'accueil
-│   │   └── providers/                # Providers (Auth)
+│   │   ├── ui/                # Composants réutilisables
+│   │   ├── layout/            # Header, Footer
+│   │   ├── home/              # Sections page d'accueil
+│   │   └── providers/         # Providers (Auth)
 │   ├── lib/
-│   │   ├── prisma.ts                 # Client Prisma
-│   │   ├── auth.ts                   # Utilitaires auth
-│   │   └── utils.ts                  # Fonctions utilitaires
+│   │   ├── api.ts             # Client API backend
+│   │   ├── auth.ts            # Configuration NextAuth
+│   │   └── utils.ts           # Fonctions utilitaires
 │   └── types/
-│       └── index.ts                  # Types TypeScript
+│       └── index.ts           # Types TypeScript
 ├── public/
-├── package.json
-├── tailwind.config.ts
-├── tsconfig.json
-└── next.config.js
+└── README.md
 ```
+
+## 🏗️ Architecture
+
+Le frontend appelle directement le backend via `lib/api.ts` :
+
+```
+Frontend (Next.js)  ──► Backend (Express.js) ──► MySQL
+     │                        │
+     └── NextAuth.js ─────────┘
+```
+
+- **Côté client** : Les composants React appellent les fonctions de `lib/api.ts`
+- **Authentification** : NextAuth.js communique avec `/api/auth/login` du backend
+- **Données** : Toutes les données (bornes, partenaires, articles, etc.) viennent du backend
 
 ## 🛠️ Technologies Utilisées
 
@@ -147,7 +166,8 @@ CliiinkRE/
 | **Next.js 14** | Framework React avec App Router |
 | **TypeScript** | Typage statique |
 | **Tailwind CSS** | Styling |
-| **Prisma** | ORM pour PostgreSQL |
+| **Express.js** | API Backend |
+| **MySQL** | Base de données |
 | **NextAuth.js** | Authentification |
 | **React Hook Form** | Gestion des formulaires |
 | **Zod** | Validation des données |
@@ -158,26 +178,23 @@ CliiinkRE/
 ## 📦 Scripts Disponibles
 
 ```bash
-# Développement
-npm run dev
+# Frontend - Développement
+cd frontend && npm run dev
 
-# Build production
-npm run build
+# Frontend - Build production
+cd frontend && npm run build
 
-# Démarrer en production
-npm start
+# Frontend - Démarrer en production
+cd frontend && npm start
 
-# Linter
-npm run lint
+# Frontend - Linter
+cd frontend && npm run lint
 
-# Prisma Studio (interface BDD)
-npx prisma studio
+# Backend - Développement
+cd backend && npm run dev
 
-# Mise à jour schéma BDD
-npx prisma db push
-
-# Reset BDD + seed
-npx prisma migrate reset
+# Backend - Production
+cd backend && npm start
 ```
 
 ## 🎨 Personnalisation

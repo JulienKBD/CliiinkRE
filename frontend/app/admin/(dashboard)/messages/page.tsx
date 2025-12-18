@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getContactMessages } from '@/lib/api'
 import { MessageSquare, Mail, Phone, Building2, User, Check, Trash2 } from 'lucide-react'
 import { Button } from '../../../../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../../components/ui/card'
@@ -14,25 +14,28 @@ type ContactMessage = {
   message: string
   type: string
   isRead: boolean
-  createdAt: Date
+  createdAt: string
 }
 
 async function getMessages(): Promise<ContactMessage[]> {
-  return await prisma.contactMessage.findMany({
-    orderBy: { createdAt: 'desc' },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      phone: true,
-      companyName: true,
-      position: true,
-      message: true,
-      type: true,
-      isRead: true,
-      createdAt: true,
-    },
-  })
+  try {
+    const messages = await getContactMessages()
+    return messages.map(m => ({
+      id: m.id,
+      name: m.name,
+      email: m.email,
+      phone: m.phone || null,
+      companyName: m.companyName || null,
+      position: m.position || null,
+      message: m.message,
+      type: m.type,
+      isRead: m.isRead,
+      createdAt: m.createdAt,
+    }))
+  } catch (error) {
+    console.error('Error fetching messages:', error)
+    return []
+  }
 }
 
 export default async function MessagesPage() {

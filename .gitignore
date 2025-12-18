@@ -46,9 +46,6 @@ next-env.d.ts
 *.swp
 *.swo
 
-# Prisma
-prisma/migrations/.DS_Store
-
 # Uploads
 public/uploads/*
 !public/uploads/.gitkeep

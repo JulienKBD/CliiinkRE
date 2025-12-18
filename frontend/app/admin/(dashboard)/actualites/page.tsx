@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { prisma } from '@/lib/prisma'
+import { getArticlesAdmin } from '@/lib/api'
 import { Plus, Edit, Trash2, FileText, Eye, EyeOff, Star } from 'lucide-react'
 import { Button } from '../../../../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../../components/ui/card'
@@ -12,32 +12,31 @@ type Article = {
   category: string
   isPublished: boolean
   isFeatured: boolean
-  publishedAt: Date | null
-  createdAt: Date
+  publishedAt: string | null
+  createdAt: string
   author: {
     name: string | null
   }
 }
 
-async function getArticles(): Promise<Article[]> {
-  return await prisma.article.findMany({
-    orderBy: { createdAt: 'desc' },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      category: true,
-      isPublished: true,
-      isFeatured: true,
-      publishedAt: true,
-      createdAt: true,
-      author: {
-        select: {
-          name: true,
-        },
-      },
-    },
-  })
+async function fetchArticles(): Promise<Article[]> {
+  try {
+    const articles = await getArticlesAdmin()
+    return articles.map(a => ({
+      id: a.id,
+      title: a.title,
+      slug: a.slug,
+      category: a.category,
+      isPublished: a.isPublished,
+      isFeatured: a.isFeatured,
+      publishedAt: a.publishedAt,
+      createdAt: a.createdAt,
+      author: { name: a.authorName || a.author?.name || null },
+    }))
+  } catch (error) {
+    console.error('Error fetching articles:', error)
+    return []
+  }
 }
 
 const categoryLabels: Record<string, string> = {
@@ -49,7 +48,7 @@ const categoryLabels: Record<string, string> = {
 }
 
 export default async function ActualitesPage() {
-  const articles = await getArticles()
+  const articles = await fetchArticles()
   const publishedCount = articles.filter(a => a.isPublished).length
   const draftCount = articles.filter(a => !a.isPublished).length
   const featuredCount = articles.filter(a => a.isFeatured).length

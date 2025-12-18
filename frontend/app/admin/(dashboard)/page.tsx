@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getBornes, getPartners, getArticles, getContactMessages, getMonthlyStats } from '@/lib/api'
 import { 
   MapPin, 
   Users, 
@@ -16,7 +16,7 @@ type RecentMessage = {
   name: string
   email: string
   type: string
-  createdAt: Date
+  createdAt: string
   isRead: boolean
 }
 
@@ -28,7 +28,7 @@ type Statistics = {
   totalPoints: number
   totalUsers: number
   totalPartners: number
-  createdAt: Date
+  createdAt: string
 } | null
 
 async function getStats(): Promise<{
@@ -40,45 +40,46 @@ async function getStats(): Promise<{
   recentMessages: RecentMessage[]
   stats: Statistics
 }> {
-  const [
-    bornesCount,
-    partnersCount,
-    articlesCount,
-    messagesCount,
-    unreadMessagesCount,
-    recentMessages,
-    stats,
-  ] = await Promise.all([
-    prisma.borne.count(),
-    prisma.partner.count(),
-    prisma.article.count({ where: { isPublished: true } }),
-    prisma.contactMessage.count(),
-    prisma.contactMessage.count({ where: { isRead: false } }),
-    prisma.contactMessage.findMany({
-      take: 5,
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        type: true,
-        createdAt: true,
-        isRead: true,
-      },
-    }),
-    prisma.statistics.findFirst({
-      orderBy: { createdAt: 'desc' },
-    }),
-  ])
+  try {
+    const [bornes, partners, articles, messages, monthlyStats] = await Promise.all([
+      getBornes(),
+      getPartners(),
+      getArticles(),
+      getContactMessages(),
+      getMonthlyStats(),
+    ])
 
-  return {
-    bornesCount,
-    partnersCount,
-    articlesCount,
-    messagesCount,
-    unreadMessagesCount,
-    recentMessages,
-    stats,
+    const publishedArticles = articles.filter(a => a.isPublished)
+    const unreadMessages = messages.filter(m => !m.isRead)
+    const recentMessages = messages.slice(0, 5).map(m => ({
+      id: m.id,
+      name: m.name,
+      email: m.email,
+      type: m.type,
+      createdAt: m.createdAt,
+      isRead: m.isRead,
+    }))
+
+    return {
+      bornesCount: bornes.length,
+      partnersCount: partners.length,
+      articlesCount: publishedArticles.length,
+      messagesCount: messages.length,
+      unreadMessagesCount: unreadMessages.length,
+      recentMessages,
+      stats: monthlyStats[0] || null,
+    }
+  } catch (error) {
+    console.error('Error fetching stats:', error)
+    return {
+      bornesCount: 0,
+      partnersCount: 0,
+      articlesCount: 0,
+      messagesCount: 0,
+      unreadMessagesCount: 0,
+      recentMessages: [],
+      stats: null,
+    }
   }
 }
 

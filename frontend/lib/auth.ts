@@ -1,7 +1,6 @@
 import { getServerSession, type NextAuthOptions, type DefaultSession } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { compare } from 'bcryptjs'
-import { prisma } from '@/lib/prisma'
+import { loginUser } from '@/lib/api'
 
 // Extend the built-in session types
 declare module 'next-auth' {
@@ -37,32 +36,21 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Veuillez remplir tous les champs')
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-          select: {
-            id: true,
-            email: true,
-            name: true,
-            password: true,
-            role: true,
-          },
-        })
+        try {
+          const result = await loginUser(credentials.email, credentials.password)
+          
+          if (!result.user) {
+            throw new Error('Email ou mot de passe incorrect')
+          }
 
-        if (!user) {
+          return {
+            id: result.user.id,
+            email: result.user.email,
+            name: result.user.name,
+            role: result.user.role,
+          }
+        } catch {
           throw new Error('Email ou mot de passe incorrect')
-        }
-
-        const isValid = await compare(credentials.password, user.password)
-
-        if (!isValid) {
-          throw new Error('Email ou mot de passe incorrect')
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
         }
       },
     }),

@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 import { MapPin, ArrowRight, Navigation } from 'lucide-react'
 import { Button } from '../ui/button'
 import { getBorneStatusLabel } from '../../lib/utils'
+import { getBornes, type Borne } from '../../lib/api'
 import type L from 'leaflet'
 
 // Dynamic import for Leaflet to avoid SSR issues
@@ -26,52 +27,15 @@ const Popup = dynamic(
   { ssr: false }
 )
 
-// Sample bornes data - will be replaced with database data
-const bornes = [
-  {
-    id: '1',
-    name: 'Borne Saint-Denis Centre',
-    address: '15 Rue Jean Chatel',
-    city: 'Saint-Denis',
-    latitude: -20.8789,
-    longitude: 55.4481,
-    status: 'ACTIVE',
-  },
-  {
-    id: '2',
-    name: 'Borne Saint-Denis Barachois',
-    address: 'Place du Barachois',
-    city: 'Saint-Denis',
-    latitude: -20.8764,
-    longitude: 55.4507,
-    status: 'ACTIVE',
-  },
-  {
-    id: '3',
-    name: 'Borne Saint-Pierre Centre',
-    address: '25 Rue des Bons Enfants',
-    city: 'Saint-Pierre',
-    latitude: -21.3393,
-    longitude: 55.4781,
-    status: 'ACTIVE',
-  },
-  {
-    id: '4',
-    name: 'Borne Saint-Paul Marché',
-    address: 'Rue du Marché',
-    city: 'Saint-Paul',
-    latitude: -21.0107,
-    longitude: 55.2701,
-    status: 'ACTIVE',
-  },
-]
-
 // Reunion Island center coordinates
 const REUNION_CENTER: [number, number] = [-21.1151, 55.5364]
 
 export default function MiniMap() {
   const [isMounted, setIsMounted] = useState(false)
   const [leafletIcon, setLeafletIcon] = useState<L.DivIcon | null>(null)
+  const [bornes, setBornes] = useState<Borne[]>([])
+  const [bornesCount, setBornesCount] = useState(0)
+  const [citiesCount, setCitiesCount] = useState(0)
 
   useEffect(() => {
     // Add Leaflet CSS via link element
@@ -94,6 +58,19 @@ export default function MiniMap() {
       setLeafletIcon(icon)
     })
     setIsMounted(true)
+
+    // Fetch bornes from API
+    getBornes({ isActive: true })
+      .then((data) => {
+        setBornes(data)
+        setBornesCount(data.length)
+        // Count unique cities
+        const cities = new Set(data.map(b => b.city))
+        setCitiesCount(cities.size)
+      })
+      .catch((err) => {
+        console.error('Error fetching bornes:', err)
+      })
 
     return () => {
       document.head.removeChild(link)
@@ -121,11 +98,11 @@ export default function MiniMap() {
             {/* Quick stats */}
             <div className="grid grid-cols-2 gap-4 mb-8">
               <div className="bg-eco-light rounded-xl p-4">
-                <p className="text-3xl font-bold text-primary">8</p>
+                <p className="text-3xl font-bold text-primary">{bornesCount || '-'}</p>
                 <p className="text-sm text-gray-600">Bornes disponibles</p>
               </div>
               <div className="bg-reward-light rounded-xl p-4">
-                <p className="text-3xl font-bold text-secondary">6</p>
+                <p className="text-3xl font-bold text-secondary">{citiesCount || '-'}</p>
                 <p className="text-sm text-gray-600">Villes couvertes</p>
               </div>
             </div>
