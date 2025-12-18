@@ -1,0 +1,7 @@
+export { default as HeroSection } from './HeroSection'
+export { default as HowItWorks } from './HowItWorks'
+export { default as StatsSection } from './StatsSection'
+export { default as ArticlesPreview } from './ArticlesPreview'
+export { default as PartnersSlider } from './PartnersSlider'
+export { default as MiniMap } from './MiniMap'
+export { default as CTASection } from './CTASection'

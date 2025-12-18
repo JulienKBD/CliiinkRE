@@ -1,0 +1,234 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 150 58% 66%;
+    --primary-foreground: 150 58% 15%;
+    --secondary: 38 92% 50%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 150 58% 96%;
+    --accent-foreground: 150 58% 30%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 150 58% 66%;
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  h4 {
+    @apply text-xl md:text-2xl;
+  }
+}
+
+@layer components {
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-padding {
+    @apply py-16 md:py-24;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-secondary text-white font-semibold rounded-lg hover:bg-secondary-500 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center px-6 py-3 border-2 border-primary text-primary font-semibold rounded-lg hover:bg-primary hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200;
+  }
+
+  .card-hover {
+    @apply card hover:-translate-y-1 transition-all duration-200;
+  }
+
+  .gradient-primary {
+    @apply bg-gradient-to-r from-primary to-primary-400;
+  }
+
+  .gradient-hero {
+    @apply bg-gradient-to-br from-primary via-primary-400 to-eco-dark;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-400;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+
+  .prose-content {
+    @apply prose prose-green prose-lg max-w-none;
+  }
+
+  .prose-content h1 {
+    @apply text-3xl font-bold text-gray-900 mb-4;
+  }
+
+  .prose-content h2 {
+    @apply text-2xl font-bold text-gray-800 mt-8 mb-4;
+  }
+
+  .prose-content h3 {
+    @apply text-xl font-semibold text-gray-800 mt-6 mb-3;
+  }
+
+  .prose-content p {
+    @apply text-gray-600 leading-relaxed mb-4;
+  }
+
+  .prose-content ul, .prose-content ol {
+    @apply my-4 pl-6;
+  }
+
+  .prose-content li {
+    @apply text-gray-600 mb-2;
+  }
+
+  .prose-content a {
+    @apply text-primary hover:text-primary-600 underline;
+  }
+
+  .prose-content strong {
+    @apply font-semibold text-gray-800;
+  }
+
+  .prose-content blockquote {
+    @apply border-l-4 border-primary pl-4 italic text-gray-600 my-4;
+  }
+}
+
+@layer utilities {
+  .animate-delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .animate-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animate-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .animate-delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .animate-delay-500 {
+    animation-delay: 500ms;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Leaflet map styles override */
+.leaflet-container {
+  @apply rounded-lg z-0;
+  font-family: inherit;
+}
+
+.leaflet-popup-content-wrapper {
+  @apply rounded-lg shadow-lg;
+}
+
+.leaflet-popup-content {
+  @apply m-0 p-0;
+}
+
+/* Custom marker styles */
+.custom-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.custom-marker > div {
+  transition: transform 0.2s ease;
+}
+
+.custom-marker:hover > div {
+  transform: scale(1.2);
+}
+
+/* Swiper customization */
+.swiper-pagination-bullet {
+  @apply bg-primary opacity-50;
+}
+
+.swiper-pagination-bullet-active {
+  @apply bg-primary opacity-100;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+  @apply text-primary;
+}
+
+/* Loading spinner */
+.spinner {
+  @apply w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin;
+}
+
+/* Skeleton loading */
+.skeleton {
+  @apply bg-gray-200 animate-pulse rounded;
+}

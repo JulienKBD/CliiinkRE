@@ -1,0 +1,23 @@
+on: [push]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy Application
+    steps:
+      - name: Deploy Action
+      - uses: actions/checkout@v2
+        run: echo "Deploying application..."
+        env:
+          OVH_HOSTING_USER: ${{ secrets.OVH_HOSTING_USER }}
+          OVH_HOSTING_PASSWORD: ${{ secrets.OVH_HOSTING_PASSWORD }}
+          OVH_HOSTING_DOMAIN: ssh.clusterXXX.hosting.ovh.net
+<<<<<<< HEAD
+          REPOSITORY: Cliiink
+          BRANCH: main
+          REPOSITORY_URL: git@github.com:ToLuUxX/Cliiink.git
+=======
+          REPOSITORY: my-repo
+          BRANCH: main
+          REPOSITORY_URL: git@github.com:username/my-repo.git
+>>>>>>> 044501ae7de4644dccb346dd11bd43f181dbcd10
