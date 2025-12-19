@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import Link from 'next/link'
 import { getArticlesAdmin } from '@/lib/api'
 import { Plus, Edit, Trash2, FileText, Eye, EyeOff, Star } from 'lucide-react'

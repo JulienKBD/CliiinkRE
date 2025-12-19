@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getContactMessages } from '@/lib/api'
 import { MessageSquare, Mail, Phone, Building2, User, Check, Trash2 } from 'lucide-react'
 import { Button } from '../../../../components/ui/button'

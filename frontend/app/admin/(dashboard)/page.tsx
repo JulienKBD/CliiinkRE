@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getBornes, getPartners, getArticles, getContactMessages, getMonthlyStats } from '@/lib/api'
 import { 
   MapPin, 

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import Link from 'next/link'
 import { getBornes } from '@/lib/api'
 import { Plus, Edit, Trash2, MapPin, CheckCircle, XCircle } from 'lucide-react'

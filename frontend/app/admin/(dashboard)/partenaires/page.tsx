@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import Link from 'next/link'
 import { getPartners } from '@/lib/api'
 import { Plus, Edit, Trash2, Users, CheckCircle, XCircle } from 'lucide-react'
