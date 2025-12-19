@@ -34,6 +34,18 @@ export default function ActualitesPage() {
   const [selectedCategory, setSelectedCategory] = useState('ALL')
   const [isLoading, setIsLoading] = useState(true)
 
+  // Helper to parse tags (handles both string and array)
+  const parseTags = (tags: string[] | string | null | undefined): string[] => {
+    if (!tags) return []
+    if (Array.isArray(tags)) return tags
+    try {
+      const parsed = JSON.parse(tags)
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      return []
+    }
+  }
+
   useEffect(() => {
     setIsLoading(true)
     const params = selectedCategory !== 'ALL' ? { category: selectedCategory } : undefined
@@ -142,18 +154,21 @@ export default function ActualitesPage() {
                           {featuredArticle.excerpt}
                         </p>
 
-                        {featuredArticle.tags && featuredArticle.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mb-6">
-                            {featuredArticle.tags.map((tag) => (
-                              <span
-                                key={tag}
-                                className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full"
-                              >
-                                #{tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
+                        {(() => {
+                          const tags = parseTags(featuredArticle.tags)
+                          return tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-6">
+                              {tags.map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full"
+                                >
+                                  #{tag}
+                                </span>
+                              ))}
+                            </div>
+                          )
+                        })()}
 
                         <div className="flex items-center text-primary font-semibold">
                           Lire l&apos;article

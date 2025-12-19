@@ -5,7 +5,7 @@ const pool = require('../../config/db');
 // GET all articles
 router.get('/api/articles', async (req, res) => {
     try {
-        const [results] = await pool.query('SELECT * FROM articles ORDER BY created_at DESC');
+        const [results] = await pool.query('SELECT * FROM articles ORDER BY createdAt DESC');
         res.json(results);
     } catch (err) {
         console.error('Error fetching articles:', err);
