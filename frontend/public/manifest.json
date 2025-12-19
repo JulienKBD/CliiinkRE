@@ -1,0 +1,21 @@
+{
+  "name": "Cliiink Reunion",
+  "short_name": "CliiinkRE",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2D8B4E",
+  "icons": [
+    {
+      "src": "/cliink.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}

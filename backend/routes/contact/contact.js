@@ -1,94 +1,77 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../../config/db.js');
+const pool = require('../../config/db');
 
-// GET - Tous les messages
-router.get('/api/contact', (req, res) => {
-    const { type, isRead, isArchived } = req.query;
-    let query = 'SELECT * FROM contact_messages WHERE 1=1';
-    const params = [];
-    
-    if (type) { query += ' AND type = ?'; params.push(type); }
-    if (isRead !== undefined) { query += ' AND isRead = ?'; params.push(isRead === 'true'); }
-    if (isArchived !== undefined) { query += ' AND isArchived = ?'; params.push(isArchived === 'true'); }
-    else { query += ' AND isArchived = false'; }
-    query += ' ORDER BY createdAt DESC';
-    
-    pool.query(query, params, (err, results) => {
-        if (err) return res.status(500).json({ error: 'Erreur serveur' });
+// GET all contact messages
+router.get('/api/contact', async (req, res) => {
+    try {
+        const [results] = await pool.query('SELECT * FROM contact_messages ORDER BY created_at DESC');
         res.json(results);
-    });
-});
-
-// GET - Stats summary
-router.get('/api/contact/stats/summary', (req, res) => {
-    pool.query(`
-        SELECT COUNT(*) as totalMessages,
-            SUM(CASE WHEN isRead = false THEN 1 ELSE 0 END) as unreadMessages,
-            SUM(CASE WHEN type = 'PARTICULIER' THEN 1 ELSE 0 END) as particulierMessages,
-            SUM(CASE WHEN type = 'COMMERCANT' THEN 1 ELSE 0 END) as commercantMessages
-        FROM contact_messages WHERE isArchived = false
-    `, (err, results) => {
-        if (err) return res.status(500).json({ error: 'Erreur serveur' });
-        res.json(results[0]);
-    });
-});
-
-// GET - Message par ID
-router.get('/api/contact/:id', (req, res) => {
-    pool.query('SELECT * FROM contact_messages WHERE id = ?', [req.params.id], (err, results) => {
-        if (err) return res.status(500).json({ error: 'Erreur serveur' });
-        if (results.length === 0) return res.status(404).json({ error: 'Message non trouvé' });
-        res.json(results[0]);
-    });
-});
-
-// POST - Créer message
-router.post('/api/contact', (req, res) => {
-    const { type, name, email, message, companyName, phone, position, attachmentUrl } = req.body;
-    if (!type || !name || !email || !message) {
-        return res.status(400).json({ error: 'Champs requis manquants' });
+    } catch (err) {
+        console.error('Error fetching contact messages:', err);
+        res.status(500).json({ error: 'Erreur serveur' });
     }
-    if (!['PARTICULIER', 'COMMERCANT'].includes(type)) {
-        return res.status(400).json({ error: 'Type de contact invalide' });
-    }
-    
-    const id = `message-${Date.now()}`;
-    pool.query(
-        'INSERT INTO contact_messages (id, type, name, email, message, companyName, phone, position, attachmentUrl, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())',
-        [id, type, name, email, message, companyName, phone, position, attachmentUrl],
-        (err) => {
-            if (err) return res.status(500).json({ error: 'Erreur serveur' });
-            res.status(201).json({ id, message: 'Message envoyé avec succès' });
+});
+
+// GET contact message by id
+router.get('/api/contact/:id', async (req, res) => {
+    try {
+        const [results] = await pool.query('SELECT * FROM contact_messages WHERE id = ?', [req.params.id]);
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'Message non trouvé' });
         }
-    );
+        res.json(results[0]);
+    } catch (err) {
+        console.error('Error fetching contact message:', err);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
 });
 
-// PUT - Marquer comme lu
-router.put('/api/contact/:id/read', (req, res) => {
-    pool.query('UPDATE contact_messages SET isRead = true WHERE id = ?', [req.params.id], (err, results) => {
-        if (err) return res.status(500).json({ error: 'Erreur serveur' });
-        if (results.affectedRows === 0) return res.status(404).json({ error: 'Message non trouvé' });
-        res.json({ message: 'Message marqué comme lu' });
-    });
+// POST create contact message
+router.post('/api/contact', async (req, res) => {
+    try {
+        const { name, email, subject, message } = req.body;
+        const [result] = await pool.query(
+            'INSERT INTO contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)',
+            [name, email, subject, message]
+        );
+        res.status(201).json({ id: result.insertId, message: 'Message envoyé avec succès' });
+    } catch (err) {
+        console.error('Error creating contact message:', err);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
 });
 
-// PUT - Archiver
-router.put('/api/contact/:id/archive', (req, res) => {
-    pool.query('UPDATE contact_messages SET isArchived = true WHERE id = ?', [req.params.id], (err, results) => {
-        if (err) return res.status(500).json({ error: 'Erreur serveur' });
-        if (results.affectedRows === 0) return res.status(404).json({ error: 'Message non trouvé' });
-        res.json({ message: 'Message archivé' });
-    });
+// PUT update contact message (mark as read/replied)
+router.put('/api/contact/:id', async (req, res) => {
+    try {
+        const { status, is_read } = req.body;
+        const [result] = await pool.query(
+            'UPDATE contact_messages SET status = ?, is_read = ? WHERE id = ?',
+            [status, is_read, req.params.id]
+        );
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Message non trouvé' });
+        }
+        res.json({ message: 'Message mis à jour' });
+    } catch (err) {
+        console.error('Error updating contact message:', err);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
 });
 
-// DELETE - Supprimer message
-router.delete('/api/contact/:id', (req, res) => {
-    pool.query('DELETE FROM contact_messages WHERE id = ?', [req.params.id], (err, results) => {
-        if (err) return res.status(500).json({ error: 'Erreur serveur' });
-        if (results.affectedRows === 0) return res.status(404).json({ error: 'Message non trouvé' });
-        res.json({ message: 'Message supprimé avec succès' });
-    });
+// DELETE contact message
+router.delete('/api/contact/:id', async (req, res) => {
+    try {
+        const [result] = await pool.query('DELETE FROM contact_messages WHERE id = ?', [req.params.id]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Message non trouvé' });
+        }
+        res.json({ message: 'Message supprimé' });
+    } catch (err) {
+        console.error('Error deleting contact message:', err);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
 });
 
 module.exports = router;
