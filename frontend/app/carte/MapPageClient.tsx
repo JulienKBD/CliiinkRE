@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
-import { MapPin, Navigation, X, List, Map, ChevronRight, Loader2 } from 'lucide-react'
+import { MapPin, Navigation, X, List, Map, ChevronRight, Loader2, Search, Filter, SlidersHorizontal } from 'lucide-react'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import {
@@ -190,91 +190,105 @@ export default function MapPageClient() {
   ].filter(Boolean).length
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <div className="bg-white border-b sticky top-16 z-30">
-        <div className="container-custom py-4">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            {/* Title */}
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Carte des bornes</h1>
-              <p className="text-gray-500 text-sm">
-                {filteredBornes.length} borne{filteredBornes.length > 1 ? 's' : ''} trouvée{filteredBornes.length > 1 ? 's' : ''}
-              </p>
+    <div className="h-[calc(100vh-64px)] flex flex-col bg-gray-100">
+      {/* Compact Header with inline filters */}
+      <div className="bg-white border-b shadow-sm z-30 flex-shrink-0">
+        <div className="container-custom py-2">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+            {/* Search - more compact */}
+            <div className="relative flex-shrink-0">
+              <Input
+                type="text"
+                placeholder="Rechercher une borne..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-44 h-9 pl-8 pr-3 text-sm"
+              />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
             </div>
 
-            {/* Filters */}
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Search */}
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Rechercher..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-48 pl-10"
-                />
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              </div>
+            {/* Separator */}
+            <div className="h-6 w-px bg-gray-200 flex-shrink-0" />
 
-              {/* City Filter */}
-              <Select value={cityFilter} onValueChange={setCityFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Ville" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cities.map((city) => (
-                    <SelectItem key={city} value={city}>
-                      {city}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* City Filter - compact */}
+            <Select value={cityFilter} onValueChange={setCityFilter}>
+              <SelectTrigger className="w-36 h-9 text-sm flex-shrink-0">
+                <MapPin className="h-3.5 w-3.5 mr-1.5 text-gray-400" />
+                <SelectValue placeholder="Ville" />
+              </SelectTrigger>
+              <SelectContent>
+                {cities.map((city) => (
+                  <SelectItem key={city} value={city}>
+                    {city}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-              {/* Status Filter */}
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="État" />
-                </SelectTrigger>
-                <SelectContent>
-                  {statuses.map((status) => (
-                    <SelectItem key={status.value} value={status.value}>
-                      {status.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Status Filter - pill buttons */}
+            <div className="flex items-center gap-1 flex-shrink-0">
+              {statuses.map((status) => (
+                <button
+                  key={status.value}
+                  onClick={() => setStatusFilter(status.value)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all whitespace-nowrap ${
+                    statusFilter === status.value
+                      ? status.value === 'ACTIVE'
+                        ? 'bg-green-100 text-green-700 ring-1 ring-green-300'
+                        : status.value === 'MAINTENANCE'
+                        ? 'bg-amber-100 text-amber-700 ring-1 ring-amber-300'
+                        : status.value === 'FULL'
+                        ? 'bg-red-100 text-red-700 ring-1 ring-red-300'
+                        : 'bg-primary text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {status.label}
+                </button>
+              ))}
+            </div>
 
-              {/* Clear filters */}
-              {activeFiltersCount > 0 && (
-                <Button variant="ghost" size="sm" onClick={clearFilters}>
-                  <X className="h-4 w-4 mr-1" />
-                  Effacer ({activeFiltersCount})
-                </Button>
-              )}
+            {/* Clear filters */}
+            {activeFiltersCount > 0 && (
+              <>
+                <div className="h-6 w-px bg-gray-200 flex-shrink-0" />
+                <button
+                  onClick={clearFilters}
+                  className="flex items-center gap-1 px-2 py-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors flex-shrink-0"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Effacer
+                </button>
+              </>
+            )}
+
+            {/* Spacer */}
+            <div className="flex-1" />
+
+            {/* Action buttons */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {/* Results count */}
+              <span className="text-xs text-gray-500 hidden sm:inline">
+                {filteredBornes.length} borne{filteredBornes.length > 1 ? 's' : ''}
+              </span>
 
               {/* Location button */}
-              <Button onClick={getUserLocation} variant="outline">
-                <Navigation className="h-4 w-4 mr-2" />
-                Me localiser
+              <Button onClick={getUserLocation} variant="outline" size="sm" className="h-9">
+                <Navigation className="h-3.5 w-3.5 sm:mr-1.5" />
+                <span className="hidden sm:inline">Localiser</span>
               </Button>
 
               {/* Toggle list/map on mobile */}
               <Button
-                variant="outline"
-                className="lg:hidden"
+                variant={showList ? "default" : "outline"}
+                size="sm"
+                className="lg:hidden h-9"
                 onClick={() => setShowList(!showList)}
               >
                 {showList ? (
-                  <>
-                    <Map className="h-4 w-4 mr-2" />
-                    Carte
-                  </>
+                  <Map className="h-3.5 w-3.5" />
                 ) : (
-                  <>
-                    <List className="h-4 w-4 mr-2" />
-                    Liste
-                  </>
+                  <List className="h-3.5 w-3.5" />
                 )}
               </Button>
             </div>
@@ -282,21 +296,21 @@ export default function MapPageClient() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="container-custom py-6">
-        <div className="grid lg:grid-cols-3 gap-6">
+      {/* Main Content - Full height */}
+      <div className="flex-1 min-h-0">
+        <div className="h-full grid lg:grid-cols-[320px_1fr] gap-0">
           {/* Sidebar - Borne List */}
-          <div className={`lg:block ${showList ? 'block' : 'hidden'}`}>
-            <div className="bg-white rounded-xl shadow-md overflow-hidden">
-              <div className="p-4 border-b">
-                <h2 className="font-semibold text-gray-900">Liste des bornes</h2>
+          <div className={`lg:block bg-white border-r overflow-hidden ${showList ? 'block' : 'hidden'}`}>
+            <div className="h-full flex flex-col">
+              <div className="p-3 border-b bg-gray-50 flex-shrink-0">
+                <h2 className="font-semibold text-gray-900 text-sm">Liste des bornes</h2>
               </div>
-              <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
+              <div className="flex-1 overflow-y-auto">
                 {filteredBornes.length === 0 ? (
-                  <div className="p-8 text-center text-gray-500">
-                    <MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>Aucune borne trouvée</p>
-                    <p className="text-sm mt-2">Essayez de modifier vos filtres</p>
+                  <div className="p-6 text-center text-gray-500">
+                    <MapPin className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                    <p className="text-sm">Aucune borne trouvée</p>
+                    <p className="text-xs mt-1">Modifiez vos filtres</p>
                   </div>
                 ) : (
                   <div className="divide-y">
@@ -307,19 +321,19 @@ export default function MapPageClient() {
                         <button
                           key={borne.id}
                           onClick={() => handleBorneClick(borne)}
-                          className={`w-full p-4 text-left hover:bg-gray-50 transition-colors ${
+                          className={`w-full p-3 text-left hover:bg-gray-50 transition-colors ${
                             isSelected ? 'bg-primary/5 border-l-4 border-primary' : ''
                           }`}
                         >
                           <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <h3 className="font-medium text-gray-900">{borne.name}</h3>
-                              <p className="text-sm text-gray-500 mt-1">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-medium text-gray-900 text-sm truncate">{borne.name}</h3>
+                              <p className="text-xs text-gray-500 mt-0.5 truncate">
                                 {borne.address}
                               </p>
-                              <p className="text-sm text-gray-400">{borne.city}</p>
+                              <p className="text-xs text-gray-400">{borne.city}</p>
                             </div>
-                            <div className="flex flex-col items-end ml-4">
+                            <div className="flex flex-col items-end ml-2 flex-shrink-0">
                               <Badge
                                 variant={
                                   borne.status === 'ACTIVE'
@@ -328,10 +342,11 @@ export default function MapPageClient() {
                                     ? 'warning'
                                     : 'danger'
                                 }
+                                className="text-xs"
                               >
                                 {status.label}
                               </Badge>
-                              <ChevronRight className="h-4 w-4 text-gray-400 mt-2" />
+                              <ChevronRight className="h-3.5 w-3.5 text-gray-400 mt-1.5" />
                             </div>
                           </div>
                         </button>
@@ -343,9 +358,9 @@ export default function MapPageClient() {
             </div>
           </div>
 
-          {/* Map */}
-          <div className={`lg:col-span-2 ${showList ? 'hidden lg:block' : 'block'}`}>
-            <div className="bg-white rounded-xl shadow-md overflow-hidden h-[calc(100vh-300px)] min-h-[500px]">
+          {/* Map - Full remaining width */}
+          <div className={`${showList ? 'hidden lg:block' : 'block'} h-full relative`}>
+            <div className="h-full">
               {isMounted ? (
                 <MapContainer
                   center={mapCenter}
@@ -357,7 +372,7 @@ export default function MapPageClient() {
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
-                  
+
                   {/* User location marker */}
                   {userLocation && icons.user && (
                     <Marker position={userLocation} icon={icons.user}>
@@ -436,26 +451,23 @@ export default function MapPageClient() {
               )}
             </div>
 
-            {/* Selected borne detail (mobile) */}
+            {/* Selected borne detail (mobile) - Fixed position */}
             {selectedBorne && (
-              <div className="lg:hidden mt-4 bg-white rounded-xl shadow-md p-4">
+              <div className="lg:hidden absolute bottom-4 left-4 right-4 bg-white rounded-xl shadow-lg p-4 z-20">
                 <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-bold text-gray-900">{selectedBorne.name}</h3>
-                    <p className="text-sm text-gray-600">{selectedBorne.address}</p>
-                    <p className="text-sm text-gray-500">{selectedBorne.city}</p>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-gray-900 text-sm">{selectedBorne.name}</h3>
+                    <p className="text-xs text-gray-600 truncate">{selectedBorne.address}</p>
+                    <p className="text-xs text-gray-500">{selectedBorne.city}</p>
                   </div>
                   <button
                     onClick={() => setSelectedBorne(null)}
-                    className="p-1 hover:bg-gray-100 rounded"
+                    className="p-1.5 hover:bg-gray-100 rounded ml-2 flex-shrink-0"
                   >
-                    <X className="h-5 w-5 text-gray-400" />
+                    <X className="h-4 w-4 text-gray-400" />
                   </button>
                 </div>
-                {selectedBorne.description && (
-                  <p className="text-sm text-gray-400 mt-2">{selectedBorne.description}</p>
-                )}
-                <div className="mt-4 flex items-center gap-3">
+                <div className="mt-3 flex items-center justify-between">
                   <Badge
                     variant={
                       selectedBorne.status === 'ACTIVE'
@@ -471,7 +483,7 @@ export default function MapPageClient() {
                     href={`https://www.google.com/maps/dir/?api=1&destination=${selectedBorne.latitude},${selectedBorne.longitude}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-primary hover:underline"
+                    className="text-xs font-medium text-primary hover:underline"
                   >
                     Itinéraire →
                   </a>

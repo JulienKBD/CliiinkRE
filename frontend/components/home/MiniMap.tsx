@@ -78,82 +78,26 @@ export default function MiniMap() {
   }, [])
 
   return (
-    <section className="section-padding bg-white">
+    <section className="section-padding bg-gradient-to-b from-gray-50 to-white">
       <div className="container-custom">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Text Content */}
-          <div>
-            <span className="inline-block px-4 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
-              Carte des bornes
-            </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Trouvez la borne la plus proche
-            </h2>
-            <p className="text-lg text-gray-600 mb-6">
-              Nos bornes de tri connectées sont réparties sur toute l&apos;île. 
-              Localisez facilement celle qui est proche de vous et commencez 
-              à cumuler des points dès aujourd&apos;hui.
-            </p>
+        {/* Section Header - Centered */}
+        <div className="text-center mb-10">
+          <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
+            <MapPin className="inline h-4 w-4 mr-1.5 -mt-0.5" />
+            Carte des bornes
+          </span>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+            Trouvez la borne la plus proche
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Nos bornes de tri connectées sont réparties sur toute l&apos;île.
+          </p>
+        </div>
 
-            {/* Quick stats */}
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="bg-eco-light rounded-xl p-4">
-                <p className="text-3xl font-bold text-primary">{bornesCount || '-'}</p>
-                <p className="text-sm text-gray-600">Bornes disponibles</p>
-              </div>
-              <div className="bg-reward-light rounded-xl p-4">
-                <p className="text-3xl font-bold text-secondary">{citiesCount || '-'}</p>
-                <p className="text-sm text-gray-600">Villes couvertes</p>
-              </div>
-            </div>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button asChild size="lg">
-                <Link href="/carte">
-                  <MapPin className="h-5 w-5 mr-2" />
-                  Voir la carte complète
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link href="/carte">
-                  <Navigation className="h-5 w-5 mr-2" />
-                  Me localiser
-                </Link>
-              </Button>
-            </div>
-
-            {/* Borne list preview */}
-            <div className="mt-8 space-y-3">
-              <p className="text-sm text-gray-500 font-medium">Quelques bornes à proximité :</p>
-              {bornes.slice(0, 3).map((borne) => {
-                const status = getBorneStatusLabel(borne.status)
-                return (
-                  <div
-                    key={borne.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                  >
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mr-3">
-                        <MapPin className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900 text-sm">{borne.name}</p>
-                        <p className="text-xs text-gray-500">{borne.address}, {borne.city}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center">
-                      <span className={`w-2 h-2 rounded-full ${status.color} mr-2`} />
-                      <span className="text-xs text-gray-500">{status.label}</span>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Map */}
-          <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-xl">
+        {/* Main Content - Map first on larger screens */}
+        <div className="grid lg:grid-cols-5 gap-8 items-stretch">
+          {/* Map - Takes more space */}
+          <div className="lg:col-span-3 relative h-[400px] lg:h-[450px] rounded-2xl overflow-hidden shadow-xl order-2 lg:order-1">
             {isMounted ? (
               <MapContainer
                 center={REUNION_CENTER}
@@ -187,23 +131,85 @@ export default function MiniMap() {
               </div>
             )}
 
+            {/* Stats overlay on map */}
+            <div className="absolute top-4 left-4 z-[1000] flex gap-2">
+              <div className="bg-white/95 backdrop-blur-sm rounded-lg px-3 py-2 shadow-md">
+                <p className="text-xl font-bold text-primary">{bornesCount || '-'}</p>
+                <p className="text-xs text-gray-600">Bornes</p>
+              </div>
+              <div className="bg-white/95 backdrop-blur-sm rounded-lg px-3 py-2 shadow-md">
+                <p className="text-xl font-bold text-secondary">{citiesCount || '-'}</p>
+                <p className="text-xs text-gray-600">Villes</p>
+              </div>
+            </div>
+
             {/* Overlay CTA */}
             <div className="absolute bottom-4 left-4 right-4 z-[1000]">
               <Link
                 href="/carte"
-                className="flex items-center justify-between bg-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+                className="flex items-center justify-between bg-white/95 backdrop-blur-sm p-3 rounded-xl shadow-lg hover:shadow-xl hover:bg-white transition-all"
               >
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center mr-3">
-                    <MapPin className="h-5 w-5 text-white" />
+                  <div className="w-9 h-9 bg-primary rounded-full flex items-center justify-center mr-3">
+                    <MapPin className="h-4 w-4 text-white" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">Voir toutes les bornes</p>
-                    <p className="text-sm text-gray-500">Carte interactive complète</p>
+                    <p className="font-semibold text-gray-900 text-sm">Voir toutes les bornes</p>
+                    <p className="text-xs text-gray-500">Carte interactive complète</p>
                   </div>
                 </div>
                 <ArrowRight className="h-5 w-5 text-primary" />
               </Link>
+            </div>
+          </div>
+
+          {/* Sidebar Content */}
+          <div className="lg:col-span-2 order-1 lg:order-2 flex flex-col">
+            {/* CTA Buttons - Compact */}
+            <div className="flex gap-3 mb-6">
+              <Button asChild className="flex-1">
+                <Link href="/carte">
+                  <MapPin className="h-4 w-4 mr-2" />
+                  Carte complète
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="flex-1">
+                <Link href="/carte">
+                  <Navigation className="h-4 w-4 mr-2" />
+                  Me localiser
+                </Link>
+              </Button>
+            </div>
+
+            {/* Borne list preview */}
+            <div className="flex-1">
+              <p className="text-sm text-gray-500 font-medium mb-3">Quelques bornes disponibles :</p>
+              <div className="space-y-2">
+                {bornes.slice(0, 4).map((borne) => {
+                  const status = getBorneStatusLabel(borne.status)
+                  return (
+                    <Link
+                      key={borne.id}
+                      href="/carte"
+                      className="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-lg hover:border-primary/30 hover:shadow-sm transition-all group"
+                    >
+                      <div className="flex items-center min-w-0 flex-1">
+                        <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-primary/20 transition-colors">
+                          <MapPin className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-medium text-gray-900 text-sm truncate">{borne.name}</p>
+                          <p className="text-xs text-gray-500 truncate">{borne.city}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center ml-2 flex-shrink-0">
+                        <span className={`w-2 h-2 rounded-full ${status.color}`} />
+                        <ArrowRight className="h-4 w-4 text-gray-300 ml-2 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
             </div>
           </div>
         </div>
