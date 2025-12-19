@@ -1,6 +1,6 @@
 // Backend API utility functions
 // Use NEXT_PUBLIC_ prefix for client-side access
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || 'http://localhost:3001'
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'
 
 async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${BACKEND_URL}${endpoint}`
@@ -11,12 +11,12 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
       ...options?.headers,
     },
   })
-  
+
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Unknown error' }))
     throw new Error(error.error || `API Error: ${response.status}`)
   }
-  
+
   return response.json()
 }
 
@@ -33,7 +33,7 @@ export async function getArticles(params?: {
   if (params?.category) searchParams.set('category', params.category)
   if (params?.isFeatured !== undefined) searchParams.set('isFeatured', String(params.isFeatured))
   if (params?.limit) searchParams.set('limit', String(params.limit))
-  
+
   const query = searchParams.toString()
   return fetchAPI<Article[]>(`/api/articles${query ? `?${query}` : ''}`)
 }
@@ -60,7 +60,7 @@ export async function getBornes(params?: {
   if (params?.city) searchParams.set('city', params.city)
   if (params?.status) searchParams.set('status', params.status)
   if (params?.isActive !== undefined) searchParams.set('isActive', String(params.isActive))
-  
+
   const query = searchParams.toString()
   return fetchAPI<Borne[]>(`/api/bornes${query ? `?${query}` : ''}`)
 }
@@ -93,7 +93,7 @@ export async function getPartners(params?: {
   if (params?.category) searchParams.set('category', params.category)
   if (params?.isFeatured !== undefined) searchParams.set('isFeatured', String(params.isFeatured))
   if (params?.isActive !== undefined) searchParams.set('isActive', String(params.isActive))
-  
+
   const query = searchParams.toString()
   return fetchAPI<Partner[]>(`/api/partners${query ? `?${query}` : ''}`)
 }
@@ -116,7 +116,7 @@ export async function getContactMessages(params?: {
   if (params?.type) searchParams.set('type', params.type)
   if (params?.isRead !== undefined) searchParams.set('isRead', String(params.isRead))
   if (params?.isArchived !== undefined) searchParams.set('isArchived', String(params.isArchived))
-  
+
   const query = searchParams.toString()
   return fetchAPI<ContactMessage[]>(`/api/contact${query ? `?${query}` : ''}`)
 }
