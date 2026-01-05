@@ -123,27 +123,27 @@ export default function Footer() {
               <li className="flex items-start space-x-3">
                 <MapPin className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
                 <span className="text-gray-400 text-sm">
-                  123 Rue de l&apos;Exemple<br />
-                  97400 Saint-Denis<br />
+                  2 rue Pierre Marinier<br />
+                  97438 Sainte-Marie<br />
                   La Réunion
                 </span>
               </li>
               <li className="flex items-center space-x-3">
                 <Phone className="h-5 w-5 text-primary flex-shrink-0" />
                 <a
-                  href="tel:+262262000000"
+                  href="tel:+262262 01 02 17"
                   className="text-gray-400 hover:text-white transition-colors duration-200 text-sm"
                 >
-                  0262 00 00 00
+                  0262 01 02 17
                 </a>
               </li>
               <li className="flex items-center space-x-3">
                 <Mail className="h-5 w-5 text-primary flex-shrink-0" />
                 <a
-                  href="mailto:contact@cliiink-reunion.re"
+                  href="mailto:yannick.settama@neogreen-oi.com"
                   className="text-gray-400 hover:text-white transition-colors duration-200 text-sm"
                 >
-                  contact@cliiink-reunion.re
+                  yannick.settama@neogreen-oi.com
                 </a>
               </li>
             </ul>
@@ -161,7 +161,7 @@ export default function Footer() {
             <div className="flex items-center space-x-4 text-sm text-gray-400">
               <span className="flex items-center">
                 <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                8 bornes actives
+                90 bornes actives
               </span>
               <span>|</span>
               <span>Fait avec 💚 à La Réunion</span>

@@ -1,7 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
-
   images: {
     remotePatterns: [
       {
@@ -9,20 +7,6 @@ const nextConfig = {
         hostname: '**',
       },
     ],
-  },
-
-  experimental: {
-    serverActions: {
-      bodySizeLimit: '10mb',
-    },
-
-    outputFileTracingRoot: __dirname,
-    outputFileTracingExcludes: {
-      '*': [
-        'backend/**',
-        'node_modules/**',
-      ],
-    },
   },
 };
 
